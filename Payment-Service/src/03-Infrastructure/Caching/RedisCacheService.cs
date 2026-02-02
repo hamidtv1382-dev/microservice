@@ -1,0 +1,25 @@
+﻿namespace Payment_Service.src._03_Infrastructure.Caching
+{
+    public class RedisCacheService : ICacheService
+    {
+        public async Task<T?> GetAsync<T>(string key)
+        {
+            // In a real implementation, you would use StackExchange.Redis here
+            // For this code generation, we return default to simulate absence of Redis
+            await Task.CompletedTask;
+            return default;
+        }
+
+        public async Task SetAsync<T>(string key, T value, TimeSpan? expiration = null)
+        {
+            // Simulated Redis implementation
+            await Task.CompletedTask;
+        }
+
+        public async Task RemoveAsync(string key)
+        {
+            // Simulated Redis implementation
+            await Task.CompletedTask;
+        }
+    }
+}

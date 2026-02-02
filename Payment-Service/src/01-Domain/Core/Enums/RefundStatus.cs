@@ -1,0 +1,10 @@
+﻿namespace Payment_Service.src._01_Domain.Core.Enums
+{
+    public enum RefundStatus
+    {
+        Pending = 0,
+        Succeeded = 1,
+        Failed = 2,
+        Rejected = 3
+    }
+}
