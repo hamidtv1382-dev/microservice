@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MarketHub.Gateway.Controllers
+namespace MarketHub.Gateway.Controllers.Catalog_Service.Vendor
 {
     [ApiController]
-    [Route("api/admin/products")] // مسیر در Gateway
+    [Route("api/vendor/products")]
     [Authorize]
-    public class AdminProductController : ControllerBase
+    public class VendorProductController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<AdminProductController> _logger;
+        private readonly ILogger<VendorProductController> _logger;
         private const string CatalogServiceBaseUrl = "https://localhost:7070";
 
-        public AdminProductController(IHttpClientFactory httpClientFactory, ILogger<AdminProductController> logger)
+        public VendorProductController(IHttpClientFactory httpClientFactory, ILogger<VendorProductController> logger)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
@@ -34,14 +34,38 @@ namespace MarketHub.Gateway.Controllers
             try
             {
                 var response = await requestAction();
+
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("{OperationName} failed: {Error}", operationName, errorContent);
                     return StatusCode((int)response.StatusCode, new { Message = $"{operationName} failed.", Details = errorContent });
                 }
-                var successResponse = await response.Content.ReadFromJsonAsync<object>();
-                return Ok(successResponse);
+
+                // Handle 204 No Content or empty responses
+                if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
+
+                // Check if response has content before trying to deserialize
+                var content = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrWhiteSpace(content))
+                {
+                    return NoContent();
+                }
+
+                // Try to deserialize JSON response
+                try
+                {
+                    var successResponse = System.Text.Json.JsonSerializer.Deserialize<object>(content);
+                    return Ok(successResponse);
+                }
+                catch (System.Text.Json.JsonException)
+                {
+                    // If content is not valid JSON, return it as plain text
+                    return Ok(new { Message = content });
+                }
             }
             catch (Exception ex)
             {
@@ -55,14 +79,12 @@ namespace MarketHub.Gateway.Controllers
         {
             var queryString = Request.QueryString.ToUriComponent();
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر: از AdminProduct استفاده می‌کنیم
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct{queryString}");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/vendor/products{queryString}");
                 },
-                "Get all admin products"
+                "Get vendor products"
             );
         }
 
@@ -70,14 +92,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> GetProduct(int id)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}");
                 },
-                "Get admin product by ID"
+                "Get vendor product by ID"
             );
         }
 
@@ -85,14 +105,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> CreateProduct([FromBody] object request)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct", request);
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/vendor/products", request);
                 },
-                "Create product"
+                "Create vendor product"
             );
         }
 
@@ -100,14 +118,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] object request)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}", request);
+                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}", request);
                 },
-                "Update product"
+                "Update vendor product"
             );
         }
 
@@ -115,14 +131,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> DeleteProduct(int id)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}");
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}");
                 },
-                "Delete product"
+                "Delete vendor product"
             );
         }
 
@@ -130,14 +144,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> PublishProduct(int id)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/publish", null);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}/publish", null);
                 },
-                "Publish product"
+                "Publish vendor product"
             );
         }
 
@@ -145,14 +157,12 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> UnpublishProduct(int id)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/unpublish", null);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}/unpublish", null);
                 },
-                "Unpublish product"
+                "Unpublish vendor product"
             );
         }
 
@@ -160,99 +170,64 @@ namespace MarketHub.Gateway.Controllers
         public async Task<IActionResult> ArchiveProduct(int id)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/archive", null);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}/archive", null);
                 },
-                "Archive product"
+                "Archive vendor product"
             );
         }
 
         [HttpPost("{id}/feature")]
-        public async Task<IActionResult> SetAsFeatured(int id)
+        public async Task<IActionResult> FeatureProduct(int id)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/feature", null);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}/feature", null);
                 },
-                "Set product as featured"
+                "Feature vendor product"
             );
         }
 
         [HttpDelete("{id}/feature")]
-        public async Task<IActionResult> RemoveFromFeatured(int id)
+        public async Task<IActionResult> UnfeatureProduct(int id)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/feature");
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}/feature");
                 },
-                "Remove product from featured"
-            );
-        }
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllForAdmin()
-        {
-            return await ForwardRequest(
-                () =>
-                {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/all");
-                },
-                "Get all products for admin"
+                "Unfeature vendor product"
             );
         }
 
-        [HttpPatch("{id}/approve")]
-        public async Task<IActionResult> ApproveProduct(int id)
+        [HttpPost("{id}/stock")]
+        public async Task<IActionResult> UpdateStock(int id, [FromBody] object request)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PatchAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/approve", null);
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}/stock", request);
                 },
-                "Approve product"
+                "Update vendor product stock"
             );
         }
 
-        [HttpPatch("{id}/reject")]
-        public async Task<IActionResult> RejectProduct(int id)
-        {
-            return await ForwardRequest(
-                () =>
-                {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    return client.PatchAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/reject", null);
-                },
-                "Reject product"
-            );
-        }
-
-        [HttpPatch("{id}/slug")]
+        [HttpPost("{id}/slug")]
         public async Task<IActionResult> UpdateSlug(int id, [FromBody] object request)
         {
             return await ForwardRequest(
-                () =>
-                {
+                () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PatchAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProduct/{id}/slug", request);
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{id}/slug", request);
                 },
-                "Update product slug"
+                "Update vendor product slug"
             );
         }
     }

@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MarketHub.Gateway.Controllers
+namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
 {
     [ApiController]
-    [Route("api/vendor/products/{productId}/variants")]
+    [Route("api/admin/productreviews")]
     [Authorize]
-    public class VendorProductVariantController : ControllerBase
+    public class AdminProductReviewController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<VendorProductVariantController> _logger;
+        private readonly ILogger<AdminProductReviewController> _logger;
         private const string CatalogServiceBaseUrl = "https://localhost:7070";
 
-        public VendorProductVariantController(IHttpClientFactory httpClientFactory, ILogger<VendorProductVariantController> logger)
+        public AdminProductReviewController(IHttpClientFactory httpClientFactory, ILogger<AdminProductReviewController> logger)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
@@ -50,107 +50,94 @@ namespace MarketHub.Gateway.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetVariants(int productId)
+        [HttpGet("product/{productId}")]
+        public async Task<IActionResult> GetProductReviews(int productId)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{productId}/variants");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/product/{productId}");
                 },
-                "Get variants for vendor product"
+                "Get product reviews for admin"
+            );
+        }
+
+        [HttpGet("pending")]
+        public async Task<IActionResult> GetPendingReviews()
+        {
+            return await ForwardRequest(
+                () => {
+                    var client = _httpClientFactory.CreateClient();
+                    AddAuthorizationHeader(client);
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/pending");
+                },
+                "Get pending reviews"
             );
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetVariant(int productId, int id)
+        public async Task<IActionResult> GetProductReview(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{productId}/variants/{id}");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}");
                 },
-                "Get variant by ID for vendor product"
+                "Get product review by ID for admin"
             );
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateVariant(int productId, [FromBody] object request)
+        [HttpPost("{id}/approve")]
+        public async Task<IActionResult> ApproveReview(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{productId}/variants", request);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}/approve", null);
                 },
-                "Create variant for vendor product"
+                "Approve review"
             );
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVariant(int productId, int id, [FromBody] object request)
+        [HttpPost("{id}/reject")]
+        public async Task<IActionResult> RejectReview(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{productId}/variants/{id}", request);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}/reject", null);
                 },
-                "Update variant for vendor product"
+                "Reject review"
+            );
+        }
+
+        [HttpPost("{id}/verify")]
+        public async Task<IActionResult> MarkAsVerified(int id)
+        {
+            return await ForwardRequest(
+                () => {
+                    var client = _httpClientFactory.CreateClient();
+                    AddAuthorizationHeader(client);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}/verify", null);
+                },
+                "Mark review as verified"
             );
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVariant(int productId, int id)
+        public async Task<IActionResult> DeleteReview(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{productId}/variants/{id}");
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}");
                 },
-                "Delete variant for vendor product"
-            );
-        }
-
-        [HttpPost("{id}/activate")]
-        public async Task<IActionResult> ActivateVariant(int productId, int id)
-        {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{productId}/variants/{id}/activate", null);
-                },
-                "Activate variant for vendor product"
-            );
-        }
-
-        [HttpPost("{id}/deactivate")]
-        public async Task<IActionResult> DeactivateVariant(int productId, int id)
-        {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{productId}/variants/{id}/deactivate", null);
-                },
-                "Deactivate variant for vendor product"
-            );
-        }
-
-        [HttpPost("{id}/stock")]
-        public async Task<IActionResult> UpdateVariantStock(int productId, int id, [FromBody] object request)
-        {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/vendor/products/{productId}/variants/{id}/stock", request);
-                },
-                "Update stock for vendor product variant"
+                "Delete review"
             );
         }
     }

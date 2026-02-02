@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace MarketHub.Gateway.Controllers
+namespace MarketHub.Gateway.Controllers.Catalog_Service.Public
 {
     [ApiController]
     [Route("api/public/brands")]

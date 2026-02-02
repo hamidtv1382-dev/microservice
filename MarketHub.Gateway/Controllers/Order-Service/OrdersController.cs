@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MarketHub.Gateway.Controllers
+namespace MarketHub.Gateway.Controllers.Order_Service
 {
     [ApiController]
-    [Route("api/admin/productreviews")]
+    [Route("api/orders")]
     [Authorize]
-    public class AdminProductReviewController : ControllerBase
+    public class OrdersController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<AdminProductReviewController> _logger;
-        private const string CatalogServiceBaseUrl = "https://localhost:7070";
+        private readonly ILogger<OrdersController> _logger;
+        private const string OrderServiceBaseUrl = "https://localhost:7226";
 
-        public AdminProductReviewController(IHttpClientFactory httpClientFactory, ILogger<AdminProductReviewController> logger)
+        public OrdersController(IHttpClientFactory httpClientFactory, ILogger<OrdersController> logger)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
@@ -50,94 +50,81 @@ namespace MarketHub.Gateway.Controllers
             }
         }
 
-        [HttpGet("product/{productId}")]
-        public async Task<IActionResult> GetProductReviews(int productId)
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder([FromBody] object request)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/product/{productId}");
+                    return client.PostAsJsonAsync($"{OrderServiceBaseUrl}/api/Orders", request);
                 },
-                "Get product reviews for admin"
-            );
-        }
-
-        [HttpGet("pending")]
-        public async Task<IActionResult> GetPendingReviews()
-        {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/pending");
-                },
-                "Get pending reviews"
+                "Create order"
             );
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetProductReview(int id)
+        public async Task<IActionResult> GetOrderById(Guid id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}");
+                    return client.GetAsync($"{OrderServiceBaseUrl}/api/Orders/{id}");
                 },
-                "Get product review by ID for admin"
+                "Get order by ID"
             );
         }
 
-        [HttpPost("{id}/approve")]
-        public async Task<IActionResult> ApproveReview(int id)
+        [HttpGet("my-orders")]
+        public async Task<IActionResult> GetMyOrders()
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}/approve", null);
+                    return client.GetAsync($"{OrderServiceBaseUrl}/api/Orders/my-orders");
                 },
-                "Approve review"
+                "Get my orders"
             );
         }
 
-        [HttpPost("{id}/reject")]
-        public async Task<IActionResult> RejectReview(int id)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateOrder(Guid id, [FromBody] object request)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}/reject", null);
+                    return client.PutAsJsonAsync($"{OrderServiceBaseUrl}/api/Orders/{id}", request);
                 },
-                "Reject review"
+                "Update order"
             );
         }
 
-        [HttpPost("{id}/verify")]
-        public async Task<IActionResult> MarkAsVerified(int id)
+        [HttpPost("{id}/cancel")]
+        public async Task<IActionResult> CancelOrder(Guid id, [FromBody] object request)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}/verify", null);
+                    return client.PostAsJsonAsync($"{OrderServiceBaseUrl}/api/Orders/{id}/cancel", request);
                 },
-                "Mark review as verified"
+                "Cancel order"
             );
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReview(int id)
+        [HttpPost("track")]
+        public async Task<IActionResult> TrackOrder([FromBody] object request)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/productreviews/{id}");
+                    return client.PostAsJsonAsync($"{OrderServiceBaseUrl}/api/Orders/track", request);
                 },
-                "Delete review"
+                "Track order"
             );
         }
     }

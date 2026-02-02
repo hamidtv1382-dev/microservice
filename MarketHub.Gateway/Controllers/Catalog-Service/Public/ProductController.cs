@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
-namespace MarketHub.Gateway.Controllers
+namespace MarketHub.Gateway.Controllers.Catalog_Service.Public
 {
     [ApiController]
     [Route("api/public/products")] // مسیر یکسان با کنترلر اصلی

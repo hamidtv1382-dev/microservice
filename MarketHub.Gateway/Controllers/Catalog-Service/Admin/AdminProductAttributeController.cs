@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MarketHub.Gateway.Controllers
+namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
 {
     [ApiController]
-    [Route("api/admin/productvariants")]
+    [Route("api/admin/productattributes")]
     [Authorize]
-    public class AdminProductVariantController : ControllerBase
+    public class AdminProductAttributeController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<AdminProductVariantController> _logger;
+        private readonly ILogger<AdminProductAttributeController> _logger;
         private const string CatalogServiceBaseUrl = "https://localhost:7070";
 
-        public AdminProductVariantController(IHttpClientFactory httpClientFactory, ILogger<AdminProductVariantController> logger)
+        public AdminProductAttributeController(IHttpClientFactory httpClientFactory, ILogger<AdminProductAttributeController> logger)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
@@ -51,95 +51,68 @@ namespace MarketHub.Gateway.Controllers
         }
 
         [HttpGet("product/{productId}")]
-        public async Task<IActionResult> GetProductVariants(int productId)
+        public async Task<IActionResult> GetProductAttributes(int productId)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/product/{productId}");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productattributes/product/{productId}");
                 },
-                "Get product variants for admin"
+                "Get product attributes"
             );
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetProductVariant(int id)
+        public async Task<IActionResult> GetProductAttribute(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productattributes/{id}");
                 },
-                "Get product variant by ID for admin"
+                "Get product attribute by ID"
             );
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProductVariant([FromBody] object request)
+        public async Task<IActionResult> CreateProductAttribute([FromBody] object request)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants", request);
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/productattributes", request);
                 },
-                "Create product variant"
+                "Create product attribute"
             );
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProductVariant(int id, [FromBody] object request)
+        public async Task<IActionResult> UpdateProductAttribute(int id, [FromBody] object request)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}", request);
+                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/productattributes/{id}", request);
                 },
-                "Update product variant"
+                "Update product attribute"
             );
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProductVariant(int id)
+        public async Task<IActionResult> DeleteProductAttribute(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}");
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/productattributes/{id}");
                 },
-                "Delete product variant"
-            );
-        }
-
-        [HttpPost("{id}/activate")]
-        public async Task<IActionResult> ActivateProductVariant(int id)
-        {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}/activate", null);
-                },
-                "Activate product variant"
-            );
-        }
-
-        [HttpPost("{id}/deactivate")]
-        public async Task<IActionResult> DeactivateProductVariant(int id)
-        {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}/deactivate", null);
-                },
-                "Deactivate product variant"
+                "Delete product attribute"
             );
         }
     }
 }
-

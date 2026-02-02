@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace MarketHub.Gateway.Controllers
+namespace MarketHub.Gateway.Controllers.IdentityService
 {
     [ApiController]
     [Route("api/auth")]

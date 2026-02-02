@@ -1,17 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace MarketHub.Gateway.Controllers
+﻿namespace MarketHub.Gateway.Controllers.Messaging_Service
 {
     [ApiController]
-    [Route("api/public/reviews")]
-    public class ProductReviewController : ControllerBase
+    [Route("api/messaging-service/chats")]
+    [Authorize]
+    public class ChatsController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<ProductReviewController> _logger;
-        private const string CatalogServiceBaseUrl = "https://localhost:7070";
+        private readonly ILogger<ChatsController> _logger;
+        private const string MessagingServiceBaseUrl = "https://localhost:7236";
 
-        public ProductReviewController(IHttpClientFactory httpClientFactory, ILogger<ProductReviewController> logger)
+        public ChatsController(IHttpClientFactory httpClientFactory, ILogger<ChatsController> logger)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
@@ -39,6 +37,12 @@ namespace MarketHub.Gateway.Controllers
                     _logger.LogError("{OperationName} failed: {Error}", operationName, errorContent);
                     return StatusCode((int)response.StatusCode, new { Message = $"{operationName} failed.", Details = errorContent });
                 }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
+
                 var successResponse = await response.Content.ReadFromJsonAsync<object>();
                 return Ok(successResponse);
             }
@@ -49,59 +53,42 @@ namespace MarketHub.Gateway.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetReview(int id)
-        {
-            return await ForwardRequest(
-                () => _httpClientFactory.CreateClient().GetAsync($"{CatalogServiceBaseUrl}/api/public/reviews/{id}"),
-                "Get review by ID"
-            );
-        }
-
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> CreateReview([FromBody] object request)
+        public async Task<IActionResult> CreateChat([FromBody] object request)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/public/reviews", request);
+                    return client.PostAsJsonAsync($"{MessagingServiceBaseUrl}/api/Chats", request);
                 },
-                "Create product review"
+                "Create chat"
             );
         }
 
-        [HttpPost("{id}/helpful")]
-        [Authorize]
-        public async Task<IActionResult> MarkReviewHelpful(int id)
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetUserChats(Guid userId)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/public/reviews/{id}/helpful", null);
+                    return client.GetAsync($"{MessagingServiceBaseUrl}/api/Chats/user/{userId}");
                 },
-                "Mark review as helpful"
+                "Get user chats"
             );
         }
 
-        [HttpGet("product/{productId}")]
-        public async Task<IActionResult> GetProductReviews(int productId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = "date", [FromQuery] bool sortAscending = false)
-        {
-            var queryString = Request.QueryString.ToUriComponent();
-            return await ForwardRequest(
-                () => _httpClientFactory.CreateClient().GetAsync($"{CatalogServiceBaseUrl}/api/public/reviews/product/{productId}{queryString}"),
-                "Get reviews for a product"
-            );
-        }
-
-        [HttpGet("product/{productId}/stats")]
-        public async Task<IActionResult> GetProductReviewStats(int productId)
+        [HttpGet("{chatId}")]
+        public async Task<IActionResult> GetChatById(Guid chatId)
         {
             return await ForwardRequest(
-                () => _httpClientFactory.CreateClient().GetAsync($"{CatalogServiceBaseUrl}/api/public/reviews/product/{productId}/stats"),
-                "Get review stats for a product"
+                () => {
+                    var client = _httpClientFactory.CreateClient();
+                    AddAuthorizationHeader(client);
+                    return client.GetAsync($"{MessagingServiceBaseUrl}/api/Chats/{chatId}");
+                },
+                "Get chat by ID"
             );
         }
     }

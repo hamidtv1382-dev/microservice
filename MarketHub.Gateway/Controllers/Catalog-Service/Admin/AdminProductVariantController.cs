@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MarketHub.Gateway.Controllers
+namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
 {
+
     [ApiController]
-    [Route("api/admin/brands")] // مسیر در Gateway
-    [Authorize] // The AdminPolicy is enforced by the downstream service
-    public class AdminBrandController : ControllerBase
+    [Route("api/admin/productvariants")]
+    [Authorize]
+    public class AdminProductVariantController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<AdminBrandController> _logger;
+        private readonly ILogger<AdminProductVariantController> _logger;
         private const string CatalogServiceBaseUrl = "https://localhost:7070";
 
-        public AdminBrandController(IHttpClientFactory httpClientFactory, ILogger<AdminBrandController> logger)
+        public AdminProductVariantController(IHttpClientFactory httpClientFactory, ILogger<AdminProductVariantController> logger)
         {
             _httpClientFactory = httpClientFactory;
             _logger = logger;
@@ -50,101 +51,94 @@ namespace MarketHub.Gateway.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetBrands()
+        [HttpGet("product/{productId}")]
+        public async Task<IActionResult> GetProductVariants(int productId)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر: از AdminBrand استفاده می‌کنیم
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/product/{productId}");
                 },
-                "Get all admin brands"
+                "Get product variants for admin"
             );
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetBrand(int id)
+        public async Task<IActionResult> GetProductVariant(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}");
                 },
-                "Get admin brand by ID"
+                "Get product variant by ID for admin"
             );
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateBrand([FromBody] object request)
+        public async Task<IActionResult> CreateProductVariant([FromBody] object request)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand", request);
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants", request);
                 },
-                "Create brand"
+                "Create product variant"
             );
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBrand(int id, [FromBody] object request)
+        public async Task<IActionResult> UpdateProductVariant(int id, [FromBody] object request)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}", request);
+                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}", request);
                 },
-                "Update brand"
+                "Update product variant"
             );
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBrand(int id)
+        public async Task<IActionResult> DeleteProductVariant(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}");
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}");
                 },
-                "Delete brand"
+                "Delete product variant"
             );
         }
 
         [HttpPost("{id}/activate")]
-        public async Task<IActionResult> ActivateBrand(int id)
+        public async Task<IActionResult> ActivateProductVariant(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}/activate", null);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}/activate", null);
                 },
-                "Activate brand"
+                "Activate product variant"
             );
         }
 
         [HttpPost("{id}/deactivate")]
-        public async Task<IActionResult> DeactivateBrand(int id)
+        public async Task<IActionResult> DeactivateProductVariant(int id)
         {
             return await ForwardRequest(
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}/deactivate", null);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}/deactivate", null);
                 },
-                "Deactivate brand"
+                "Deactivate product variant"
             );
         }
     }
