@@ -186,7 +186,7 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             if (brand != null && !brand.IsDeleted)
             {
                 brand.Activate();
-                _dbContext.Brands.Update(brand);
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
         }
 
@@ -196,7 +196,7 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             if (brand != null && !brand.IsDeleted)
             {
                 brand.Deactivate();
-                _dbContext.Brands.Update(brand);
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
         }
 

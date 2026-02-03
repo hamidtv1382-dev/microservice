@@ -53,8 +53,10 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
         public async Task<IActionResult> GetCategoryTree()
         {
             var categories = await _categoryService.GetCategoryTreeAsync();
-            return Ok(categories);
+            var response = _mapper.Map<List<CategoryTreeResponse>>(categories);
+            return Ok(response);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest request)
@@ -110,7 +112,7 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
                 request.MetaTitle,
                 request.MetaDescription);
 
-            return NoContent();
+            return Ok("successfully");
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)

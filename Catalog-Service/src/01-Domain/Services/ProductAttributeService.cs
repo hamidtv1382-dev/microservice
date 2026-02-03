@@ -43,7 +43,7 @@ namespace Catalog_Service.src._01_Domain.Services
         public async Task<IEnumerable<ProductAttribute>> GetByProductIdAsync(int productId, CancellationToken cancellationToken = default)
         {
             // Check if product exists
-            var product = await _productRepository.GetByIdAsync(productId, cancellationToken);
+            var product = await _productRepository.AdminGetByIdAsync(productId, cancellationToken);
             if (product == null)
                 throw new NotFoundException($"Product with ID {productId} not found");
 
@@ -70,7 +70,7 @@ namespace Catalog_Service.src._01_Domain.Services
                 throw new ArgumentException("Attribute value is required", nameof(value));
 
             // Check if product exists
-            var product = await _productRepository.GetByIdAsync(productId, cancellationToken);
+            var product = await _productRepository.AdminGetByIdAsync(productId, cancellationToken);
             if (product == null)
                 throw new NotFoundException($"Product with ID {productId} not found");
 

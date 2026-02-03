@@ -59,18 +59,34 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Public
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> CreateReview([FromBody] object request)
         {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/public/reviews", request);
-                },
-                "Create product review"
-            );
+            try
+            {
+                var client = _httpClientFactory.CreateClient("CatalogServiceClient");
+                AddAuthorizationHeader(client);
+
+                var response = await client.PostAsJsonAsync(
+                    $"{CatalogServiceBaseUrl}/api/public/reviews",
+                    request
+                );
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                return new ContentResult
+                {
+                    Content = content,
+                    ContentType = "application/json",
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during Create product review");
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
+
 
         [HttpPost("{id}/helpful")]
         [Authorize]

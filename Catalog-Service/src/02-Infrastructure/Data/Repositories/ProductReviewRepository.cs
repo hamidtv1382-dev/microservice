@@ -238,9 +238,10 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             if (review != null && !review.IsDeleted)
             {
                 review.IncrementHelpfulVotes();
-                _dbContext.ProductReviews.Update(review);
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
         }
+
 
         public async Task DecrementHelpfulVotesAsync(int reviewId, CancellationToken cancellationToken = default)
         {
@@ -307,8 +308,12 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
         public async Task<double> GetAverageRatingAsync(int productId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.ProductReviews
-                .Where(pr => pr.ProductId == productId && pr.Status == ReviewStatus.Approved && !pr.IsDeleted)
-                .AverageAsync(pr => pr.Rating, cancellationToken);
+                .Where(r => r.ProductId == productId &&
+                            r.Status == ReviewStatus.Approved &&
+                            !r.IsDeleted)
+                .Select(r => (double?)r.Rating)
+                .AverageAsync(cancellationToken)
+                ?? 0.0;
         }
 
         public async Task<int> GetTotalReviewsCountAsync(int productId, CancellationToken cancellationToken = default)

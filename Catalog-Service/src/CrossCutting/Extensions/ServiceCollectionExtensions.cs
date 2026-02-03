@@ -96,6 +96,8 @@ namespace Catalog_Service.src.CrossCutting.Extensions
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<MappingProfile>();
+                cfg.AddProfile<AdminCategoryProfile>();
+                cfg.AddProfile<CategoryTreeProfile>();
 
                 cfg.AddProfile<AdminMappingProfile>();
                 cfg.AddProfile<VendorMappingProfile>();

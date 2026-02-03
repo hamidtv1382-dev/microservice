@@ -402,7 +402,7 @@ namespace Catalog_Service.src._01_Domain.Services
             }
             else
             {
-                product = await _productRepository.GetByIdAsync(id, cancellationToken);
+                product = await _productRepository.AdminGetByIdAsync(id, cancellationToken);
 
                 if (product == null)
                 {

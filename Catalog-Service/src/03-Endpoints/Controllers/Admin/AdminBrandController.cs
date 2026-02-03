@@ -133,21 +133,21 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Admin
         public async Task<IActionResult> DeleteBrand(int id)
         {
             await _brandService.DeleteAsync(id);
-            return NoContent();
+            return Ok("Brand deleted successfully.");
         }
 
         [HttpPost("{id}/activate")]
         public async Task<IActionResult> ActivateBrand(int id)
         {
             await _brandService.ActivateAsync(id);
-            return NoContent();
+            return Ok("Brand activated successfully.");
         }
 
         [HttpPost("{id}/deactivate")]
         public async Task<IActionResult> DeactivateBrand(int id)
         {
             await _brandService.DeactivateAsync(id);
-            return NoContent();
+            return Ok("Brand deactivated successfully.");
         }
     }
 }

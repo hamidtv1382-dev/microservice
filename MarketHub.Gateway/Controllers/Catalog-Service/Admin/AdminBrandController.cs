@@ -109,43 +109,95 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBrand(int id)
         {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}");
-                },
-                "Delete brand"
-            );
+            try
+            {
+                var client = _httpClientFactory.CreateClient("CatalogServiceClient");
+                AddAuthorizationHeader(client);
+
+                var response = await client.DeleteAsync(
+                    $"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}"
+                );
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                return new ContentResult
+                {
+                    Content = string.IsNullOrWhiteSpace(content)
+                        ? "{\"message\":\"Brand deleted successfully.\"}"
+                        : content,
+                    ContentType = "application/json",
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while deleting brand {BrandId}", id);
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
+
 
         [HttpPost("{id}/activate")]
         public async Task<IActionResult> ActivateBrand(int id)
         {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}/activate", null);
-                },
-                "Activate brand"
-            );
+            try
+            {
+                var client = _httpClientFactory.CreateClient("CatalogServiceClient");
+                AddAuthorizationHeader(client);
+
+                var response = await client.PostAsync(
+                    $"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}/activate",
+                    null
+                );
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                return new ContentResult
+                {
+                    Content = string.IsNullOrWhiteSpace(content)
+                        ? "{\"message\":\"Brand activated successfully.\"}"
+                        : content,
+                    ContentType = "application/json",
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while activating brand {BrandId}", id);
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
         [HttpPost("{id}/deactivate")]
         public async Task<IActionResult> DeactivateBrand(int id)
         {
-            return await ForwardRequest(
-                () => {
-                    var client = _httpClientFactory.CreateClient();
-                    AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}/deactivate", null);
-                },
-                "Deactivate brand"
-            );
+            try
+            {
+                var client = _httpClientFactory.CreateClient("CatalogServiceClient");
+                AddAuthorizationHeader(client);
+
+                var response = await client.PostAsync(
+                    $"{CatalogServiceBaseUrl}/api/admin/AdminBrand/{id}/deactivate",
+                    null
+                );
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                return new ContentResult
+                {
+                    Content = string.IsNullOrWhiteSpace(content)
+                        ? "{\"message\":\"Brand deactivated successfully.\"}"
+                        : content,
+                    ContentType = "application/json",
+                    StatusCode = (int)response.StatusCode
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while deactivating brand {BrandId}", id);
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
+
     }
 }

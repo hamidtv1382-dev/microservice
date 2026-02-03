@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
 {
@@ -34,14 +35,29 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
             try
             {
                 var response = await requestAction();
+                var contentString = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("{OperationName} failed: {Error}", operationName, errorContent);
-                    return StatusCode((int)response.StatusCode, new { Message = $"{operationName} failed.", Details = errorContent });
+                    _logger.LogError("{OperationName} failed: {Error}", operationName, contentString);
+                    return StatusCode((int)response.StatusCode, new { Message = $"{operationName} failed.", Details = contentString });
                 }
-                var successResponse = await response.Content.ReadFromJsonAsync<object>();
-                return Ok(successResponse);
+
+                // اگر محتوا خالی است
+                if (string.IsNullOrWhiteSpace(contentString))
+                    return StatusCode((int)response.StatusCode, new { });
+
+                // اگر محتوا JSON نیست، همان متن را برگردان
+                try
+                {
+                    var json = JsonSerializer.Deserialize<object>(contentString);
+                    return StatusCode((int)response.StatusCode, json);
+                }
+                catch
+                {
+                    // متن ساده را بدون Deserialize برمی‌گردانیم
+                    return StatusCode((int)response.StatusCode, contentString);
+                }
             }
             catch (Exception ex)
             {

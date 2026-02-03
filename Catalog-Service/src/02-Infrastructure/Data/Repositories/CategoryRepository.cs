@@ -346,8 +346,10 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
 
                 category.SetParentCategory(newParentId);
                 _dbContext.Categories.Update(category);
+                await _dbContext.SaveChangesAsync(cancellationToken); // تغییر ذخیره شد
             }
         }
+
 
         public async Task ActivateAsync(int categoryId, CancellationToken cancellationToken = default)
         {
@@ -356,6 +358,7 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             {
                 category.Activate();
                 _dbContext.Categories.Update(category);
+                await _dbContext.SaveChangesAsync(cancellationToken); // تغییر ذخیره شد
             }
         }
 
@@ -366,8 +369,10 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
             {
                 category.Deactivate();
                 _dbContext.Categories.Update(category);
+                await _dbContext.SaveChangesAsync(cancellationToken); // تغییر ذخیره شد
             }
         }
+
 
         public async Task ActivateWithSubCategoriesAsync(int categoryId, CancellationToken cancellationToken = default)
         {

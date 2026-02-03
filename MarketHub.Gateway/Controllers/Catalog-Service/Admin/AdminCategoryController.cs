@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
+using System.Text.Json;
 
 namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
 {
@@ -34,14 +36,29 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
             try
             {
                 var response = await requestAction();
+                var contentString = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("{OperationName} failed: {Error}", operationName, errorContent);
-                    return StatusCode((int)response.StatusCode, new { Message = $"{operationName} failed.", Details = errorContent });
+                    _logger.LogError("{OperationName} failed: {Error}", operationName, contentString);
+                    return StatusCode((int)response.StatusCode, new { Message = $"{operationName} failed.", Details = contentString });
                 }
-                var successResponse = await response.Content.ReadFromJsonAsync<object>();
-                return Ok(successResponse);
+
+                // اگر محتوا خالی است
+                if (string.IsNullOrWhiteSpace(contentString))
+                    return StatusCode((int)response.StatusCode, new { });
+
+                // اگر محتوا JSON نیست، همان متن را برگردان
+                try
+                {
+                    var json = JsonSerializer.Deserialize<object>(contentString);
+                    return StatusCode((int)response.StatusCode, json);
+                }
+                catch
+                {
+                    // متن ساده را بدون Deserialize برمی‌گردانیم
+                    return StatusCode((int)response.StatusCode, contentString);
+                }
             }
             catch (Exception ex)
             {
@@ -49,6 +66,7 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
                 return StatusCode(500, new { Message = $"An error occurred during {operationName}." });
             }
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetCategories()
@@ -107,18 +125,32 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(int id, [FromBody] object request)
+        public async Task<IActionResult> UpdateCategory(
+           int id,
+           [FromBody] JsonElement request)
         {
             return await ForwardRequest(
-                () => {
+                () =>
+                {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    // اصلاح مسیر
-                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminCategory/{id}", request);
+
+                    var json = request.GetRawText();
+                    var content = new StringContent(
+                        json,
+                        Encoding.UTF8,
+                        "application/json"
+                    );
+
+                    return client.PutAsync(
+                        $"{CatalogServiceBaseUrl}/api/admin/AdminCategory/{id}",
+                        content
+                    );
                 },
                 "Update category"
             );
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)

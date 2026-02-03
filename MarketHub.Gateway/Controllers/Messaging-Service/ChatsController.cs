@@ -1,4 +1,7 @@
-﻿namespace MarketHub.Gateway.Controllers.Messaging_Service
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace MarketHub.Gateway.Controllers.Messaging_Service
 {
     [ApiController]
     [Route("api/messaging-service/chats")]

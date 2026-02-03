@@ -52,13 +52,14 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<ProductVariant>> GetActiveVariantsAsync(int productId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ProductVariant>> GetActiveVariantsAsync(
+       int productId,
+       CancellationToken cancellationToken = default)
         {
             return await _dbContext.ProductVariants
                 .Where(pv => pv.ProductId == productId && pv.IsActive && !pv.IsDeleted)
                 .Include(pv => pv.Product)
                 .Include(pv => pv.Attributes)
-                .Include(pv => pv.ImageUrl)
                 .ToListAsync(cancellationToken);
         }
 
@@ -200,23 +201,31 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<decimal> GetMinPriceAsync(int productId, CancellationToken cancellationToken = default)
+        public async Task<decimal> GetMinPriceAsync(
+      int productId,
+      CancellationToken cancellationToken = default)
         {
-            var minPrice = await _dbContext.ProductVariants
-                .Where(pv => pv.ProductId == productId && pv.IsActive && !pv.IsDeleted)
-                .MinAsync(pv => pv.Price.Amount, cancellationToken);
+            var prices = await _dbContext.ProductVariants
+                .Where(v => v.ProductId == productId && v.IsActive && !v.IsDeleted)
+                .Select(v => v.Price)
+                .ToListAsync(cancellationToken);
 
-            return minPrice;
+            return prices.Any() ? prices.Min(p => p.Amount) : 0m;
         }
 
-        public async Task<decimal> GetMaxPriceAsync(int productId, CancellationToken cancellationToken = default)
-        {
-            var maxPrice = await _dbContext.ProductVariants
-                .Where(pv => pv.ProductId == productId && pv.IsActive && !pv.IsDeleted)
-                .MaxAsync(pv => pv.Price.Amount, cancellationToken);
 
-            return maxPrice;
+        public async Task<decimal> GetMaxPriceAsync(
+      int productId,
+      CancellationToken cancellationToken = default)
+        {
+            var prices = await _dbContext.ProductVariants
+                .Where(v => v.ProductId == productId && v.IsActive && !v.IsDeleted)
+                .Select(v => v.Price)
+                .ToListAsync(cancellationToken);
+
+            return prices.Any() ? prices.Max(p => p.Amount) : 0m;
         }
+
 
         public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
         {

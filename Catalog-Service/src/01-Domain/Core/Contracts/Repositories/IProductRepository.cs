@@ -12,6 +12,7 @@ namespace Catalog_Service.src._01_Domain.Core.Contracts.Repositories
         // متدهای اصلی CRUD
         Task<Product> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<Product> GetBySkuAsync(string sku, CancellationToken cancellationToken = default);
+        Task<Product> AdminGetByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<Product> GetBySlugAsync(Slug slug, CancellationToken cancellationToken = default);
         Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<Product>> GetActiveProductsAsync(CancellationToken cancellationToken = default);

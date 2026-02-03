@@ -34,7 +34,18 @@ namespace Catalog_Service.src._02_Infrastructure.Data.Repositories
                 .Include(p => p.Tags)
                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted && p.IsApproved, cancellationToken);
         }
-
+        public async Task<Product> AdminGetByIdAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Products
+                .Include(p => p.Brand)
+                .Include(p => p.Category)
+                .Include(p => p.Images)
+                .Include(p => p.Variants)
+                .Include(p => p.Attributes)
+                .Include(p => p.Reviews)
+                .Include(p => p.Tags)
+                .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted , cancellationToken);
+        }
         public async Task<Product> GetByIdVendorAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Products

@@ -1,4 +1,7 @@
-﻿namespace MarketHub.Gateway.Controllers.Seller_Finance_Service
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace MarketHub.Gateway.Controllers.Seller_Finance_Service
 {
     [ApiController]
     [Route("api/seller-finance-service/payouts")]

@@ -57,9 +57,11 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Public
             if (product == null || product.Status != ProductStatus.Published)
                 throw new NotFoundException("Product", request.ProductId);
 
-            var userId = User.FindFirst("sub")?.Value;
-            if (string.IsNullOrEmpty(userId))
-                throw new global::Catalog_Service.src.CrossCutting.Exceptions.UnauthorizedAccessException("User", "CreateReview");
+           var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+if (string.IsNullOrWhiteSpace(userId))
+    throw new global::Catalog_Service.src.CrossCutting.Exceptions.UnauthorizedAccessException(
+        "User",
+        "CreateReview");
 
             var existingReview = await _productReviewService.GetUserReviewForProductAsync(userId, request.ProductId, cancellationToken);
             if (existingReview != null)
@@ -82,13 +84,23 @@ namespace Catalog_Service.src._03_Endpoints.Controllers.Public
         [Authorize(Roles = RoleConstants.Customer)]
         public async Task<IActionResult> MarkReviewHelpful(int id, CancellationToken cancellationToken)
         {
-            var review = await _productReviewService.GetByIdAsync(id, cancellationToken);
-            if (review == null || review.Status != ReviewStatus.Approved)
-                throw new NotFoundException("ProductReview", id);
+            try
+            {
+                var review = await _productReviewService.GetByIdAsync(id, cancellationToken);
+                if (review == null || review.Status != ReviewStatus.Approved)
+                    return NotFound(new { message = "Product review not found or not approved." });
 
-            await _productReviewService.IncrementHelpfulVotesAsync(id, cancellationToken);
-            return NoContent();
+                await _productReviewService.IncrementHelpfulVotesAsync(id, cancellationToken);
+
+                return Ok(new { message = "Helpful vote added successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
+
+
 
         [HttpGet("product/{productId}")]
         public async Task<ActionResult<PagedResponse<ProductReviewResponse>>> GetProductReviews(

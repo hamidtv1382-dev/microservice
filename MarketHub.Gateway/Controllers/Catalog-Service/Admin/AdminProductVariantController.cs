@@ -58,7 +58,7 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/product/{productId}");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProductVariant/product/{productId}");
                 },
                 "Get product variants for admin"
             );
@@ -71,7 +71,7 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}");
+                    return client.GetAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProductVariant/{id}");
                 },
                 "Get product variant by ID for admin"
             );
@@ -84,7 +84,7 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants", request);
+                    return client.PostAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProductVariant", request);
                 },
                 "Create product variant"
             );
@@ -97,7 +97,7 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}", request);
+                    return client.PutAsJsonAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProductVariant/{id}", request);
                 },
                 "Update product variant"
             );
@@ -110,7 +110,7 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}");
+                    return client.DeleteAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProductVariant/{id}");
                 },
                 "Delete product variant"
             );
@@ -123,7 +123,7 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}/activate", null);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProductVariant/{id}/activate", null);
                 },
                 "Activate product variant"
             );
@@ -136,7 +136,7 @@ namespace MarketHub.Gateway.Controllers.Catalog_Service.Admin
                 () => {
                     var client = _httpClientFactory.CreateClient();
                     AddAuthorizationHeader(client);
-                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/productvariants/{id}/deactivate", null);
+                    return client.PostAsync($"{CatalogServiceBaseUrl}/api/admin/AdminProductVariant/{id}/deactivate", null);
                 },
                 "Deactivate product variant"
             );

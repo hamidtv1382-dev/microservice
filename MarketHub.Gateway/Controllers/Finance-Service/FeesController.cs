@@ -1,4 +1,7 @@
-﻿namespace MarketHub.Gateway.Controllers.Finance_Service
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace MarketHub.Gateway.Controllers.Finance_Service
 {
     [ApiController]
     [Route("api/finance-service/fees")]
